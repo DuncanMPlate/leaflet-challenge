@@ -102,18 +102,18 @@ var legend = L.control({position: 'topright'});
 legend.onAdd = function (map) {
 
     var div = L.DomUtil.create('div', 'info legend'),
-        grades = [0, 10, 30, 50, 70, 90],
-        labels = [];
+        depth = [0, 10, 30, 50, 70, 90],
+        labels = ['<strong>Depths(km)</strong>'];
 
     // loop through our density intervals and generate a label with a colored square for each interval
-    for (var i = 0; i < grades.length; i++) {
+    for (var i = 0; i < depth.length; i++) {
         div.innerHTML +=
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
-            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+            '<i style="background:' + getColor(depth[i] + 1) + '"></i> ' +
+            depth[i] + (depth[i + 1] ? '&ndash;' + depth[i + 1] + '<br>' : '+');
     }
 
     return div;
 };
 
-legend.addTo(map);
+legend.addTo(myMap);
 };
