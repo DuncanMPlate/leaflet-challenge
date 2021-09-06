@@ -1,7 +1,7 @@
 base_url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
 
 
-function circleColor(depth) {
+function getColor(depth) {
     if (depth <= 10) {
         return "#D1FF33";
     } else if (depth <= 30) {
@@ -17,7 +17,7 @@ function circleColor(depth) {
     };
 };
 
-function circleRadius(mag) {
+function getRadius(mag) {
     if (mag <= 1) {
         return 10000;
     } else if (mag <= 2){
@@ -41,29 +41,26 @@ d3.json(base_url).then(function (data) {
 function createFeatures(earthquakeData) {
 
   var earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature
-  });
-
-
+    onEachFeature: function (feature, layer) {
   
-function onEachFeature(feature, layer) {
-    layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p><br>
+        layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p><br>
                     Magnitude: ${feature.properties.mag}<br>
                     ${new Date(feature.properties.time)}<br>
-                    Depth: ${feature.geometry.coordinates[2]} km</p>`),
+                    Depth: ${feature.geometry.coordinates[2]} km</p>`)},
   
-      pointToLayer: function (feature, location) {
-        return new L.circle(location, {
-        fillColor: circleColor(feature.geometry.coordinates[2]),
-        radius:  circleRadius(feature.properties.mag),
-        fillOpacity: .75,
-        stroke: true,
-        weight: 1
-   })
-
- };
+        pointToLayer: function (feature, location) {
+          return new L.circle(location, {
+            fillColor: getColor(feature.geometry.coordinates[2]),
+            radius:  getRadius(feature.properties.mag),
+            fillOpacity: .75,
+            stroke: true,
+            weight: 1
+        })
+      }
+    }
+  );
   createMap(earthquakes);
-}};
+};
 
  
 function createMap(earthquakes) {
@@ -99,18 +96,24 @@ function createMap(earthquakes) {
 
   
 
-}
+
 var legend = L.control({position: 'topright'});
 
 legend.onAdd = function (map) {
-   var div = L.DomUtil.create('div', 'info legend'),
-   depths =  [0, 25, 50, 75, 100],
-   labels = [];
-   for (var i = 0; i < depths.length; i++) {
-     div.innerHtml +=
-      `<i style="backround:' + circleColor(depths[i] + 1) + '"></i> ` 
-      depths[i] + depths[i] + 1 ? '&ndash;' + depths[i +1] + '<br>' : '+');
-   };
-   return  div;
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 10, 30, 50, 70, 90],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
 };
-legend.addTo(myMap);
+
+legend.addTo(map);
+};
